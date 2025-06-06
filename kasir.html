@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BELAJAR JS</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: rgb(229, 229, 228);
+      }
+      .product-card {
+        width: 120px;
+        height: 120px;
+        margin: 5px;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        text-align: center;
+        padding: 10px;
+        font-size: 12px;
+        cursor: pointer;
+      }
+      .text-muted img {
+        width: 50px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="card position-relative p-3 mt-2 mb-3 text-center">
+        <!-- Tombol di kiri -->
+        <div class="position-absolute start-0 top-50 translate-middle-y ms-3">
+          <button class="btn btn-primary">
+            <span id="tanggal"></span>
+          </button>
+        </div>
+
+        <!-- Judul di tengah -->
+        <h6 class="m-0">BELAJAR MEMBUAT WEB KASIR SEDERHANA</h6>
+      </div>
+
+      <div class="row">
+        <div class="col-md-8">
+          <div class="card">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Produk</th>
+                  <th>Kuantitas</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <div class="p-3">
+              <h6>Total Item: <span id="total-item">0</span></h6>
+              <h6>Total Harga: Rp <span id="total-harga">0</span></h6>
+            </div>
+            <div id="tombol_bayar" class="btn btn-danger m-3">BAYAR</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card">
+            <button class="btn btn-primary m-2">MENU</button>
+
+            <div class="sidebar-box d-flex flex-wrap justify-content-center">
+              <!-- Contoh Produk -->
+              <div class="product-card">
+                <div class="text-muted">
+                  <img src="images/indomie-original.jpg" alt="" />
+                </div>
+                Indomie Original<br />
+                <small>10.000</small>
+              </div>
+              <div class="product-card">
+                <div class="text-muted">
+                  <img src="images/indomie-original.jpg" alt="" />
+                </div>
+                Indomie Telur<br />
+                <small>15.000</small>
+              </div>
+              <div class="product-card">
+                <div class="text-muted">
+                  <img src="images/indomie-original.jpg" alt="" />
+                </div>
+                Indomie Double<br />
+                <small>15.000</small>
+              </div>
+              <div class="product-card">
+                <div class="text-muted">
+                  <img src="images/indomie-original.jpg" alt="" />
+                </div>
+                Indomie Aceh<br />
+                <small>10.000</small>
+              </div>
+              <div class="product-card">
+                <div class="text-muted">
+                  <img src="images/indomie-original.jpg" alt="" />
+                </div>
+                Indomie Rendang<br />
+                <small>10.000</small>
+              </div>
+              <div class="product-card">
+                <div class="text-muted">
+                  <img src="images/esteh.jpg" alt="" />
+                </div>
+                Es Teh<br />
+                <small>3.000</small>
+              </div>
+
+              <!-- Tambahkan produk lainnya sesuai kebutuhan -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      const productCards = document.querySelectorAll(".product-card");
+      const tbody = document.querySelector("tbody");
+      const totalItemEl = document.getElementById("total-item");
+      const totalHargaEl = document.getElementById("total-harga");
+      // fungsi tanggal
+      const tanggal = new Date();
+      const tampil_tanggal = tanggal.toLocaleDateString("id-ID", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      document.getElementById("tanggal").textContent = tampil_tanggal;
+
+      document.getElementById("tombol_bayar").onclick = function () {
+        alert("Terimakasih Atas Pembelian nya ");
+        location.reload();
+      }; // Fungsi tambah produk ke keranjang
+      productCards.forEach((card) => {
+        card.addEventListener("click", () => {
+          const name = card.childNodes[2].textContent.trim();
+          const price = parseInt(
+            card.querySelector("small").textContent.trim().replace(/\./g, "")
+          );
+
+          let existingRow = Array.from(tbody.children).find((row) => {
+            return row.children[0].textContent.trim() === name;
+          });
+
+          if (existingRow) {
+            const qtyInput = existingRow.querySelector("input");
+            qtyInput.value = parseInt(qtyInput.value) + 1;
+          } else {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+          <td>${name}</td>
+          <td>
+            <div class="input-group">
+              <button class="btn btn-outline-secondary btn-sm btn-minus">-</button>
+              <input type="text" class="form-control form-control-sm text-center qty" value="1" style="max-width: 60px" readonly />
+              <button class="btn btn-outline-secondary btn-sm btn-plus">+</button>
+            </div>
+          </td>
+          <td class="subtotal" data-price="${price}">Rp ${price.toLocaleString()}</td>
+          <td>
+            <button class="btn btn-sm btn-danger btn-remove">&times;</button>
+          </td>
+        `;
+            tbody.appendChild(row);
+          }
+
+          attachEventListeners();
+          updateTotals();
+        });
+      });
+
+      // Pasang listener tombol
+      function attachEventListeners() {
+        const plusButtons = document.querySelectorAll(".btn-plus");
+        const minusButtons = document.querySelectorAll(".btn-minus");
+        const removeButtons = document.querySelectorAll(".btn-remove");
+
+        plusButtons.forEach((btn) => {
+          btn.onclick = () => {
+            const input = btn.parentElement.querySelector(".qty");
+            input.value = parseInt(input.value) + 1;
+            updateTotals();
+          };
+        });
+
+        minusButtons.forEach((btn) => {
+          btn.onclick = () => {
+            const input = btn.parentElement.querySelector(".qty");
+            if (parseInt(input.value) > 1) {
+              input.value = parseInt(input.value) - 1;
+              updateTotals();
+            }
+          };
+        });
+
+        removeButtons.forEach((btn) => {
+          btn.onclick = () => {
+            const row = btn.closest("tr");
+            row.remove();
+            updateTotals();
+          };
+        });
+      }
+
+      // Hitung ulang total
+      function updateTotals() {
+        let totalItem = 0;
+        let totalHarga = 0;
+
+        tbody.querySelectorAll("tr").forEach((row) => {
+          const qty = parseInt(row.querySelector(".qty").value);
+          const hargaSatuan = parseInt(
+            row.querySelector(".subtotal").dataset.price
+          );
+          totalItem += qty;
+          totalHarga += qty * hargaSatuan;
+        });
+
+        totalItemEl.textContent = totalItem;
+        totalHargaEl.textContent = totalHarga.toLocaleString();
+      }
+
+      attachEventListeners();
+      updateTotals();
+    </script>
+  </body>
+</html>
